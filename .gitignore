@@ -1,0 +1,5 @@
+hidden_usage_examples.md
+.terraform.lock.hcl
+.terraform/*
+function.zip
+terraform.tfstate*

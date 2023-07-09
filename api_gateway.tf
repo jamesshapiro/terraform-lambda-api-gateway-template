@@ -1,7 +1,7 @@
 # Create the API Gateway Lambda proxy endpoint
 resource "aws_api_gateway_rest_api" "this" {
   name        = var.app_name
-  description = "API Gateway REST API for the get-songs-index Lambda function"
+  description = "API Gateway REST API for the ${var.app_name} application"
 }
 
 resource "aws_api_gateway_resource" "resource" {
@@ -38,53 +38,6 @@ resource "aws_lambda_permission" "get" {
   source_arn = "${aws_api_gateway_rest_api.this.execution_arn}/*/*/*"
 }
 
-# OPTIONS HTTP method.
-resource "aws_api_gateway_method" "get_options" {
-  rest_api_id      = aws_api_gateway_rest_api.this.id
-  resource_id      = aws_api_gateway_resource.resource.id
-  http_method      = "OPTIONS"
-  authorization    = "NONE"
-  api_key_required = false
-}
-
-resource "aws_api_gateway_method_response" "get_options" {
-  rest_api_id = aws_api_gateway_rest_api.this.id
-  resource_id = aws_api_gateway_resource.resource.id
-  http_method = aws_api_gateway_method.get_options.http_method
-  status_code = "200"
-  response_models = {
-    "application/json" = "Empty"
-  }
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = true
-    "method.response.header.Access-Control-Allow-Methods" = true
-    "method.response.header.Access-Control-Allow-Origin"  = true
-  }
-}
-
-resource "aws_api_gateway_integration" "get_options" {
-  rest_api_id          = aws_api_gateway_rest_api.this.id
-  resource_id          = aws_api_gateway_resource.resource.id
-  http_method          = "OPTIONS"
-  type                 = "MOCK"
-  passthrough_behavior = "WHEN_NO_MATCH"
-  request_templates = {
-    "application/json" : "{\"statusCode\": 200}"
-  }
-}
-
-resource "aws_api_gateway_integration_response" "get_options" {
-  rest_api_id = aws_api_gateway_rest_api.this.id
-  resource_id = aws_api_gateway_resource.resource.id
-  http_method = aws_api_gateway_integration.get_options.http_method
-  status_code = "200"
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-    "method.response.header.Access-Control-Allow-Methods" = "'POST,PUT,GET,DELETE,OPTIONS'"
-    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
-  }
-}
-
 # POST endpoint
 # =================================================================================================
 
@@ -113,8 +66,10 @@ resource "aws_lambda_permission" "post" {
   source_arn = "${aws_api_gateway_rest_api.this.execution_arn}/*/*/*"
 }
 
-# OPTIONS HTTP method.
-resource "aws_api_gateway_method" "post_options" {
+# OPTIONS HTTP method
+# =================================================================================================
+
+resource "aws_api_gateway_method" "options" {
   rest_api_id      = aws_api_gateway_rest_api.this.id
   resource_id      = aws_api_gateway_resource.resource.id
   http_method      = "OPTIONS"
@@ -122,10 +77,10 @@ resource "aws_api_gateway_method" "post_options" {
   api_key_required = false
 }
 
-resource "aws_api_gateway_method_response" "post_options" {
+resource "aws_api_gateway_method_response" "options" {
   rest_api_id = aws_api_gateway_rest_api.this.id
   resource_id = aws_api_gateway_resource.resource.id
-  http_method = aws_api_gateway_method.post_options.http_method
+  http_method = aws_api_gateway_method.options.http_method
   status_code = "200"
   response_models = {
     "application/json" = "Empty"
@@ -137,7 +92,7 @@ resource "aws_api_gateway_method_response" "post_options" {
   }
 }
 
-resource "aws_api_gateway_integration" "post_options" {
+resource "aws_api_gateway_integration" "options" {
   rest_api_id          = aws_api_gateway_rest_api.this.id
   resource_id          = aws_api_gateway_resource.resource.id
   http_method          = "OPTIONS"
@@ -148,10 +103,10 @@ resource "aws_api_gateway_integration" "post_options" {
   }
 }
 
-resource "aws_api_gateway_integration_response" "post_options" {
+resource "aws_api_gateway_integration_response" "options" {
   rest_api_id = aws_api_gateway_rest_api.this.id
   resource_id = aws_api_gateway_resource.resource.id
-  http_method = aws_api_gateway_integration.post_options.http_method
+  http_method = aws_api_gateway_integration.options.http_method
   status_code = "200"
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
@@ -160,7 +115,7 @@ resource "aws_api_gateway_integration_response" "post_options" {
   }
 }
 
-
+# API deployment / stage / api key / usage plan
 # =================================================================================================
 
 resource "aws_api_gateway_deployment" "this" {

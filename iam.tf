@@ -86,7 +86,7 @@ resource "aws_iam_policy" "post_lambda" {
       "Effect": "Allow",
       "Action": [
         "dynamodb:UpdateItem",
-        "dynamodb:GetItem"
+        "dynamodb:GetItem",
         "dynamodb:Scan"
       ],
       "Resource": [
